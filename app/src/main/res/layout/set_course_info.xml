@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/get_num_dialog"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <TextView
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:id="@+id/course_name"
+        android:text="@string/course_name"
+        android:textSize="20sp"
+        android:gravity="center"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <EditText
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:id="@+id/input_course_name"
+        android:inputType="text"
+        android:imeOptions="actionDone"
+        android:hint="@string/compulsory"
+        app:layout_constraintStart_toEndOf="@id/course_name"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <TextView
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:id="@+id/course_location"
+        android:text="@string/course_locaion"
+        android:textSize="20sp"
+        android:gravity="center"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/course_name"
+        android:layout_marginTop="20dp"
+        />
+
+    <EditText
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:id="@+id/input_course_location"
+        android:inputType="text"
+        android:imeOptions="actionDone"
+        android:hint="@string/selective"
+        app:layout_constraintStart_toEndOf="@id/course_location"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/input_course_name"
+        android:layout_marginTop="20dp"
+        />
+
+    <TextView
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:id="@+id/course_teacher"
+        android:text="@string/course_teacher"
+        android:textSize="20sp"
+        android:gravity="center"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/course_location"
+        android:layout_marginTop="20dp"
+        />
+
+    <EditText
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:id="@+id/input_course_teacher"
+        android:inputType="text"
+        android:imeOptions="actionDone"
+        android:hint="@string/selective"
+        app:layout_constraintStart_toEndOf="@id/course_location"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/input_course_location"
+        android:layout_marginTop="20dp"
+        />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/set_info_confirm"
+        android:text="@string/confirm"
+        android:textSize="20sp"
+        android:gravity="center"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/confirm_button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/input_course_teacher"
+        android:layout_marginVertical="50dp"
+        />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/set_info_cancel"
+        android:text="@string/cancel"
+        android:textSize="20sp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/cancel_button"
+        app:layout_constraintTop_toBottomOf="@id/set_info_confirm"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginVertical="10dp"
+        />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/set_info_delete"
+        android:text="@string/delete"
+        android:textSize="20sp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/delete_button"
+        app:layout_constraintTop_toBottomOf="@id/set_info_cancel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginVertical="10dp"
+        android:visibility="gone"
+        />
+</androidx.constraintlayout.widget.ConstraintLayout>

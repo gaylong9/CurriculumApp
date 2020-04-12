@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#6200EE</color>
+    <color name="colorPrimaryDark">#3700B3</color>
+    <color name="colorAccent">#03DAC5</color>
+    <color name="course1">#85bca3ef</color>
+    <color name="course2">#85efd6a3</color>
+    <color name="course3">#85a3e2ef</color>
+    <color name="black">#000000</color>
+    <color name="blue">#2c4fce</color>
+    <color name="confirm_button">#8be1f9</color>
+    <color name="cancel_button">#c8cdd0</color>
+    <color name="delete_button">#f5757b</color>
+</resources>

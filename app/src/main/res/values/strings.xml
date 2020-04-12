@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">课程表</string>
+    <string name="Monday">星期一</string>
+    <string name="Tuesday">星期二</string>
+    <string name="Thursday">星期四</string>
+    <string name="Wednesday">星期三</string>
+    <string name="Friday">星期五</string>
+    <string name="temp">temp</string>
+    <string name="course_num">一天课程总数：</string>
+    <string name="confirm">确  定</string>
+    <string name="cancel">取  消</string>
+    <string name="course_name">课程：</string>
+    <string name="course_locaion">教室：</string>
+    <string name="compulsory">必填</string>
+    <string name="selective">非必填</string>
+    <string name="course_teacher">教师：</string>
+    <string name="delete">删除本课程</string>
+    <string name="clear_data">重设数据</string>
+    <string name="delte_confrim">确定删除所有数据\n并重新设置吗？</string>
+</resources>
