@@ -21,6 +21,10 @@ public class MyDBHelper extends SQLiteOpenHelper {
             "id integer primary key autoincrement," +
             "time text)";
 
+//    public static final String CREATE_SETTINGS = "create table Settings (" +
+//            "id integer primary key autoincrement," +
+//            "selected text)";
+
     private static final String TAG = "MyDBHelper";
 
     private Context mcontext;
@@ -35,6 +39,9 @@ public class MyDBHelper extends SQLiteOpenHelper {
         // 建表
         db.execSQL(CREATE_CURRICULUM);
         db.execSQL(CREATE_BASICINFO);
+//        db.execSQL(CREATE_SETTINGS);
+//        db.execSQL("insert into Settings(id, selected) values(?, ?)",
+//                new String[] {"1", "0"});   // 课前通知
         Log.d(TAG, "onCreate: " + "Created DB.");
     }
 
@@ -42,6 +49,7 @@ public class MyDBHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("drop table if exists Curriculum");
         db.execSQL("drop table if exists BasicInfo");
+//        db.execSQL("drop table if exists Settings");
         onCreate(db);
     }
 }

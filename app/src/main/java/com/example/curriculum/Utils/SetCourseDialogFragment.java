@@ -99,7 +99,7 @@ public class SetCourseDialogFragment extends DialogFragment
     }
 
     public interface SetCourseInfoListener {
-        void onClickResult(int id, int state, boolean existence, String course_name, String course_location, String course_teacher);
+        void onSetCourseInfoClickResult(int id, int state, boolean existence, String course_name, String course_location, String course_teacher);
     }
 
     @Override
@@ -109,7 +109,7 @@ public class SetCourseDialogFragment extends DialogFragment
             case R.id.set_info_confirm:
                 if (listener != null) {
                     if (!name.getText().toString().equals("")) {
-                        listener.onClickResult(id, CONFIRM, existence, name.getText().toString(),
+                        listener.onSetCourseInfoClickResult(id, CONFIRM, existence, name.getText().toString(),
                                 location.getText().toString(), teacher.getText().toString());
                         dismiss();
                     }
@@ -117,14 +117,14 @@ public class SetCourseDialogFragment extends DialogFragment
                 break;
             case R.id.set_info_cancel:
                 if (listener != null) {
-                    listener.onClickResult(id, CANCEL, existence, name.getText().toString(),
+                    listener.onSetCourseInfoClickResult(id, CANCEL, existence, name.getText().toString(),
                             location.getText().toString(), teacher.getText().toString());
                     dismiss();
                 }
                 break;
             case R.id.set_info_delete:
                 if (existence && listener != null) {
-                    listener.onClickResult(id, DELETE, existence, null, null, null);
+                    listener.onSetCourseInfoClickResult(id, DELETE, existence, null, null, null);
                     dismiss();
                 }
         }

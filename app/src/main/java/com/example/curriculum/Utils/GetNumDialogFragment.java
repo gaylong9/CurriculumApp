@@ -63,7 +63,7 @@ public class    GetNumDialogFragment extends DialogFragment
     }
 
     public interface GetNumConfirmListener {
-        void onClickComplete(int num);
+        void onGetNumClickComplete(int num);
     }
 
     @Override
@@ -73,7 +73,7 @@ public class    GetNumDialogFragment extends DialogFragment
                 GetNumConfirmListener listener = (GetNumConfirmListener) getActivity();
                 if (listener != null) {
                     if (!editText.getText().toString().equals("")) {
-                        listener.onClickComplete(Integer.parseInt(editText.getText().toString()));
+                        listener.onGetNumClickComplete(Integer.parseInt(editText.getText().toString()));
                         dismiss();
                     }
                 }

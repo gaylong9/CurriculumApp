@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="150dp"
     xmlns:app="http://schemas.android.com/apk/res-auto">
@@ -37,6 +38,15 @@
             android:textSize="15sp"
             android:maxLines="2"
             app:layout_constraintTop_toBottomOf="@id/course_location"
+            />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/course_time"
+            android:textSize="15sp"
+            android:maxLines="2"
+            app:layout_constraintTop_toBottomOf="@id/teacher"
             />
     </androidx.constraintlayout.widget.ConstraintLayout>
 

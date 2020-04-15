@@ -17,4 +17,6 @@
     <string name="delete">删除本课程</string>
     <string name="clear_data">重设数据</string>
     <string name="delte_confrim">确定删除所有数据\n并重新设置吗？</string>
+    <string name="select_remind_text">课前提醒</string>
+    <string name="set_time">设置时间</string>
 </resources>
