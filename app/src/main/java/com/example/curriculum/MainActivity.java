@@ -1,6 +1,5 @@
 package com.example.curriculum;
 
-import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -14,7 +13,6 @@ import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.TimePicker;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -30,6 +28,7 @@ import com.example.curriculum.Utils.SingleCourseLayout;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
@@ -41,6 +40,7 @@ public class MainActivity extends AppCompatActivity
     private int course_num = 0;         // 一天中的总课程数
     private LinearLayout linearLayout;  // 右侧碎片中，课程框的父布局
     private int cur_weekday;            // 当前日 1：周一 2：周二
+    private int cur_week;               // 当前周
     private int hour;                   // 设置时间所用
     private int minute;
     private static final String TAG = "MainActivity";
@@ -58,6 +58,12 @@ public class MainActivity extends AppCompatActivity
         linearLayout = (LinearLayout) findViewById(R.id.right_linearlayout);
         listView = (ListView) findViewById(R.id.days);
 
+        // 打开数据库
+        dbHelper = new MyDBHelper(this, "Course.db", null, 1);
+        db = dbHelper.getWritableDatabase();
+        sp_editor = MainActivity.this.getPreferences(0).edit();
+        sp_reader = getSharedPreferences("MainActivity", 0);
+
         // 获取当前星期几
         Calendar calendar = Calendar.getInstance(); // 1：周日 2：周一
         cur_weekday = calendar.get(Calendar.DAY_OF_WEEK) - 1;
@@ -65,20 +71,17 @@ public class MainActivity extends AppCompatActivity
             cur_weekday = 7;
         }
 
+        // 设置当前周
+        setCurWeek();
+
         // 填充左侧碎片
         inflateLeftFragment();
 
-        // 打开数据库
-        dbHelper = new MyDBHelper(this, "Course.db", null, 1);
-        db = dbHelper.getWritableDatabase();
-        sp_editor = MainActivity.this.getPreferences(0).edit();
-        sp_reader = getSharedPreferences("MainActivity", 0);
-
         // 判断是否已设置过课程数
-        Cursor cursor = db.rawQuery("select * from BasicInfo", null);
+        Cursor cursor = db.rawQuery("select * from TimeInfo", null);
         course_num = cursor.getCount();
         cursor.close();
-        // course_num = basicinfo_reader.getInt("course_num", 0);
+        // course_num = timeinfo_reader.getInt("course_num", 0);
         if (course_num == 0) {
             // 无课程，则获取每天课程数与时间 & 动态填充右侧碎片
             GetNumDialogFragment getNumDialogFragment = new GetNumDialogFragment();
@@ -86,6 +89,66 @@ public class MainActivity extends AppCompatActivity
         } else {
             // 有课程，正常读取，填入碎片中
             addCourseLayout();
+        }
+    }
+
+    // 获取当前周，设置title
+    private void setCurWeek() {
+        Calendar cal = Calendar.getInstance();
+        cal.setFirstDayOfWeek(Calendar.MONDAY); // 设置每周的第一天为星期一
+        cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY); // 每周从周一开始
+        cal.setMinimalDaysInFirstWeek(7); // 设置每周最少为7天
+        cal.setTime(new Date());
+        int cur_week_of_year = cal.get(Calendar.WEEK_OF_YEAR);
+        Log.d(TAG, "onCreate: cur_week_of_year:" + cur_week_of_year);
+
+        Cursor cursor = db.rawQuery("select * from Settings where keys = ?",
+                new String[] {"start_year"});
+        cursor.moveToFirst();
+        int start_year = Integer.parseInt(cursor.getString(cursor.getColumnIndex("value")));
+        cursor.close();
+        cursor = db.rawQuery("select * from Settings where keys = ?",
+                new String[] {"start_week_of_year"});
+        cursor.moveToFirst();
+        int start_week_of_year = Integer.parseInt(cursor.getString(cursor.getColumnIndex("value")));
+        cursor.close();
+        cursor = db.rawQuery("select value from Settings where keys = ?",
+                new String[] {"week_sum"});
+        cursor.moveToFirst();
+        int week_sum = Integer.parseInt(cursor.getString(cursor.getColumnIndex("value")));
+        cursor.close();
+
+        Log.d(TAG, "setCurWeek: " + start_year + start_week_of_year);
+
+        if (start_year == 0 || start_week_of_year == 0) {
+            this.cur_week = 0;
+            setTitle("课程表");
+        } else if (start_year == cal.get(Calendar.YEAR)) {
+            // 今年开始，当前学期周 = 当前自然周 - 学期开始周 + 1
+            this.cur_week = cur_week_of_year - start_week_of_year + 1;
+            if (cur_week <= week_sum && cur_week != 0) {
+                setTitle("第" + this.cur_week + "周");
+            } else if (cur_week > week_sum && cur_week != 0) {
+                setTitle("第" + week_sum + "周");
+            } else {
+                setTitle("课程表");
+            }
+        } else {
+            // 去年开始，当前学期周 = 去年总周数 - 学期开始周 + 1 + 当前自然周
+            Calendar cal1 = Calendar.getInstance();
+            cal.setFirstDayOfWeek(Calendar.MONDAY); // 设置每周的第一天为星期一
+            cal1.set(Calendar.YEAR, cal.get(Calendar.YEAR) - 1); // Set only year
+            cal1.set(Calendar.MONTH, Calendar.DECEMBER); // Don't change
+            cal1.set(Calendar.DAY_OF_MONTH, 31); // Don't change
+            int totalWeeks = cal1.get(Calendar.WEEK_OF_YEAR);
+            this.cur_week = totalWeeks - start_week_of_year + 1 + cur_week_of_year;
+            if (cur_week <= week_sum && cur_week != 0) {
+                setTitle("第" + this.cur_week + "周");
+            } else if (cur_week > week_sum && cur_week != 0) {
+                setTitle("第" + week_sum + "周");
+            } else {
+                setTitle("课程表");
+            }
         }
     }
 
@@ -108,9 +171,10 @@ public class MainActivity extends AppCompatActivity
                 deleteDataConfirm.show(getSupportFragmentManager(), null);
                 break;
             case R.id.set_time_item:
-                Intent intent_to_set_time = new Intent(MainActivity.this, SetTime.class);
-                intent_to_set_time.putExtra("course_num", course_num);
-                startActivityForResult(intent_to_set_time, 1);
+                Intent intent_to_settings = new Intent(MainActivity.this, Settings.class);
+                intent_to_settings.putExtra("course_num", course_num);
+                intent_to_settings.putExtra("cur_week", cur_week);
+                startActivityForResult(intent_to_settings, 1);
                 break;
         }
         return true;
@@ -146,7 +210,7 @@ public class MainActivity extends AppCompatActivity
     // 动态填充右侧布局
     private void addCourseLayout() {
         // 获取时间信息
-        Cursor time_cursor = db.rawQuery("select * from BasicInfo", null);
+        Cursor time_cursor = db.rawQuery("select * from TimeInfo", null);
         time_cursor.moveToFirst();
 
         // 逐个填充右侧
@@ -262,13 +326,13 @@ public class MainActivity extends AppCompatActivity
         course_num = num;
         //TODO: 根据课程数，多次设置时间
         for (int i = 1; i <= num; i++) {
-            db.execSQL("insert into BasicInfo(id, time) values(?, ?)",
+            db.execSQL("insert into TimeInfo(id, time) values(?, ?)",
                     new String[] {"" + i, ""});
         }
         // 布局中动态增加课程布局
         addCourseLayout();
 
-        final Cursor temp = db.rawQuery("select time from BasicInfo where id = ?", new String[] {"" + 1});
+        final Cursor temp = db.rawQuery("select time from TimeInfo where id = ?", new String[] {"" + 1});
         String time = "第" + "1节课： ";
         if (temp.getCount() == 1) {
             // 库中已有时间信息
@@ -286,6 +350,7 @@ public class MainActivity extends AppCompatActivity
         TextView name = (TextView) singleCourseLayout.findViewById(R.id.course_name);
         TextView location = (TextView) singleCourseLayout.findViewById(R.id.course_location);
         TextView teacher = (TextView) singleCourseLayout.findViewById(R.id.teacher);
+        TextView time = (TextView) singleCourseLayout.findViewById(R.id.course_time);
         String old_name = name.getText().toString();
         String old_location = location.getText().toString();
         String old_teacher = teacher.getText().toString();
@@ -296,6 +361,8 @@ public class MainActivity extends AppCompatActivity
             name.setText("");
             location.setText("");
             teacher.setText("");
+            time.setText("");
+
             // 删除本课程
             db.execSQL("delete from Curriculum where id = ?", new String[] {"" + id});
         } else if (state == SetCourseDialogFragment.CONFIRM){
@@ -316,6 +383,8 @@ public class MainActivity extends AppCompatActivity
                 // 数据库中无本节课
                 db.execSQL("insert into Curriculum(id, name, location, teacher) values(?, ?, ?, ?)",
                         new String[] {"" + id, course_name, course_location, course_teacher});
+                linearLayout.removeAllViews();
+                addCourseLayout();
             }
         } else {
             // 点击取消按钮
@@ -341,8 +410,8 @@ public class MainActivity extends AppCompatActivity
             sp_editor.clear();
             sp_editor.apply();
             db.execSQL("delete from Curriculum");
-            db.execSQL("delete from BasicInfo");
-            // db.execSQL("update Settings set selected = ?", new String[] {"0"});
+            db.execSQL("delete from TimeInfo");
+            db.execSQL("update Settings set value = ?", new String[] {"0"});
 
             // 重启
             Intent intent = new Intent(this, MainActivity.class);
@@ -357,6 +426,12 @@ public class MainActivity extends AppCompatActivity
                 // 重置当前信息
                 linearLayout.removeAllViews();
                 addCourseLayout();
+//                Log.d(TAG, "onActivityResult: data==null? " + (data == null));
+//                this.cur_week = data.getIntExtra("cur_week", 0);
+//                if (cur_week != 0) {
+//                    setTitle("第" + this.cur_week + "周");
+//                }
+                setCurWeek();
                 Log.d(TAG, "onActivityResult: reset info after set time.");
             default:
                 break;

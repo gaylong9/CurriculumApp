@@ -18,7 +18,7 @@
         </activity>
 
         <activity
-            android:name=".SetTime"
+            android:name=".Settings"
             android:label="设置上课时间">
             <intent-filter>
                 <action android:name="android.intent.action.SET_TIME"/>
