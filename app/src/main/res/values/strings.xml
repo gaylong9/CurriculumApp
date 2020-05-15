@@ -21,4 +21,6 @@
     <string name="setting">设置</string>
     <string name="week_sum">本学期周数：</string>
     <string name="cur_week">当前周数：</string>
+    <string name="note_hint">可在此记录作业/计划/待办</string>
+    <string name="radio_tag">radio</string>
 </resources>

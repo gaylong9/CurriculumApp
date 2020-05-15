@@ -7,12 +7,12 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/right_scrollview"
+        android:id="@+id/settings_scrollview"
         >
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/set_time_layout"
+            android:id="@+id/settings_layout"
             android:orientation="vertical"
             >
 

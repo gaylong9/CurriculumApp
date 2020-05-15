@@ -10,7 +10,7 @@
         android:layout_width="150dp"
         android:layout_height="match_parent"
         android:id="@+id/left_frag"
-        android:name="com.example.curriculum.Utils.LeftFragment"
+        android:name="com.example.curriculum.utils.LeftFragment"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/right_frag"
         />
@@ -19,7 +19,7 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:id="@+id/right_frag"
-        android:name="com.example.curriculum.Utils.RightFragment"
+        android:name="com.example.curriculum.utils.RightFragment"
         app:layout_constraintStart_toEndOf="@id/left_frag"
         app:layout_constraintEnd_toEndOf="parent"
         />

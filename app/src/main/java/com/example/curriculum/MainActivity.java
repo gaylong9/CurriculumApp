@@ -10,6 +10,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -18,13 +19,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.curriculum.Utils.DeleteDataConfirm;
-import com.example.curriculum.Utils.GetNumDialogFragment;
-import com.example.curriculum.Utils.InfoExistence;
-import com.example.curriculum.Utils.LeftListViewAdapater;
-import com.example.curriculum.Utils.MyDBHelper;
-import com.example.curriculum.Utils.SetCourseDialogFragment;
-import com.example.curriculum.Utils.SingleCourseLayout;
+import com.example.curriculum.utils.DeleteDataConfirm;
+import com.example.curriculum.utils.GetNumDialogFragment;
+import com.example.curriculum.utils.InfoExistence;
+import com.example.curriculum.utils.LeftListViewAdapater;
+import com.example.curriculum.utils.MyDBHelper;
+import com.example.curriculum.utils.SetCourseDialogFragment;
+import com.example.curriculum.utils.SingleCourseLayout;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -59,7 +60,7 @@ public class MainActivity extends AppCompatActivity
         listView = (ListView) findViewById(R.id.days);
 
         // 打开数据库
-        dbHelper = new MyDBHelper(this, "Course.db", null, 1);
+        dbHelper = new MyDBHelper(this, "Course.db", null, 3);
         db = dbHelper.getWritableDatabase();
         sp_editor = MainActivity.this.getPreferences(0).edit();
         sp_reader = getSharedPreferences("MainActivity", 0);
@@ -77,11 +78,11 @@ public class MainActivity extends AppCompatActivity
         // 填充左侧碎片
         inflateLeftFragment();
 
-        // 判断是否已设置过课程数
-        Cursor cursor = db.rawQuery("select * from TimeInfo", null);
+        // 判断是否已设置过每日课程数
+        Cursor cursor = db.rawQuery("select value from Settings where type = ?",
+                new String[] {"start_time"});
         course_num = cursor.getCount();
         cursor.close();
-        // course_num = timeinfo_reader.getInt("course_num", 0);
         if (course_num == 0) {
             // 无课程，则获取每天课程数与时间 & 动态填充右侧碎片
             GetNumDialogFragment getNumDialogFragment = new GetNumDialogFragment();
@@ -200,24 +201,28 @@ public class MainActivity extends AppCompatActivity
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 adapter.setCurrentItem(position);
                 adapter.notifyDataSetChanged();
-                cur_weekday = position + 1; // position: 0：周一 1：周二
+                cur_weekday = position + 1;     // position: 0：周一 1：周二
                 linearLayout.removeAllViews();  // 先清空右侧
-                addCourseLayout();  // 重新布局
+                addCourseLayout();              // 重新布局
             }
         });
     }
 
     // 动态填充右侧布局
     private void addCourseLayout() {
+        Log.d(TAG, "addCourseLayout: set right layout.");
         // 获取时间信息
-        Cursor time_cursor = db.rawQuery("select * from TimeInfo", null);
+        //Cursor time_cursor = db.rawQuery("select * from TimeInfo", null);
+        Cursor time_cursor = db.rawQuery("select * from Settings where type = ?",
+                new String[] {"start_time"});
+
         time_cursor.moveToFirst();
 
         // 逐个填充右侧
         for (int i = 1; i <= course_num; i++) {
             // 根据一天中课程总数，动态添加右侧课程框数
             final SingleCourseLayout singleCourseLayout = new SingleCourseLayout(MainActivity.this, null);
-            int id = cur_weekday*100 + i;   // id与星期几 第几节课有关
+            final int id = cur_weekday*100 + i;   // id：星期几1位，第几节课2位
             singleCourseLayout.setId(id);
             switch (i % 5) {
                 case 0:
@@ -240,9 +245,11 @@ public class MainActivity extends AppCompatActivity
             // 判断课程信息是否已有
             InfoExistence info = new InfoExistence();
             info = getInfo(id, singleCourseLayout);
+            Log.d(TAG, "addCourseLayout: turn to id: " + id);
 
             // 获得课程已有信息后，在右侧显示
             if (info.existence == InfoExistence.SQLite) {
+                Log.d(TAG, "addCourseLayout: will set course " + info.name);
                 ((TextView) singleCourseLayout.findViewById(R.id.course_name)).setText(info.name);
                 TextView location = ((TextView) singleCourseLayout.findViewById(R.id.course_location));
                 if (info.location.equals("")) {
@@ -259,18 +266,37 @@ public class MainActivity extends AppCompatActivity
                     teacher.setText(info.teacher);
                 }
                 ((TextView) singleCourseLayout.findViewById(R.id.course_time)).setText(
-                        time_cursor.getString(time_cursor.getColumnIndex("time")));
+                        time_cursor.getString(time_cursor.getColumnIndex("value")));
+                Log.d(TAG, "addCourseLayout: get time : " +
+                        time_cursor.getString(time_cursor.getColumnIndex("value")));
             }
             time_cursor.moveToNext();
 
             // 设置右侧点击
-            singleCourseLayout.setOnClickListener(new View.OnClickListener() {
+            // 点击课程便签
+            ImageView course_note = (ImageView) singleCourseLayout.findViewById(R.id.single_course_note);
+            course_note.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    String course_name = ((TextView) singleCourseLayout.findViewById(R.id.course_name))
+                            .getText().toString();
+                    Intent intent_to_note = new Intent(MainActivity.this, Note.class);
+                    intent_to_note.putExtra("course_name", course_name);
+                    intent_to_note.putExtra("course_id", id);
+                    startActivity(intent_to_note);
+                }
+            });
+            // 点击课程信息设置
+            ImageView course_setting = (ImageView) singleCourseLayout.findViewById(R.id.single_course_setting);
+            course_setting.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.d(TAG, "onClick: sindleCLID " + singleCourseLayout.getId());
+                    Log.d(TAG, "onClick: now id " + ((SingleCourseLayout)v.getParent().getParent().getParent()).getId());
                     // 点击课程，添加/修改/删除课程信息
                     // 从数据库判断是否已存在课程信息
-                    InfoExistence click_info = new InfoExistence();
-                    click_info = getInfo(v.getId(), singleCourseLayout);
+                    InfoExistence click_info;
+                    click_info = getInfo(((SingleCourseLayout)v.getParent().getParent().getParent()).getId(), singleCourseLayout);
                     Log.d(TAG, "onClick: right info: " + click_info.name + "," + click_info.location + "," + click_info.teacher);
                     SetCourseDialogFragment setCourseDialogFragment = new SetCourseDialogFragment(
                             singleCourseLayout.getId(),
@@ -279,13 +305,14 @@ public class MainActivity extends AppCompatActivity
                     setCourseDialogFragment.show(getSupportFragmentManager(), null);
                 }
             });
-            linearLayout.addView(singleCourseLayout);
+            linearLayout.addView(singleCourseLayout, linearLayout.getChildCount());
         }
         time_cursor.close();
     }
 
     // 判断课程信息存在性，并返回
     private InfoExistence getInfo(int id, SingleCourseLayout singleCourseLayout) {
+        Log.d(TAG, "getInfo: get id: " + id);
         InfoExistence info = new InfoExistence();
         // 根据id和数据库内容，判断课程信息存在性
         Cursor cursor = db.rawQuery("select * from Curriculum where id = ?", new String[] {"" + singleCourseLayout.getId()});
@@ -298,14 +325,16 @@ public class MainActivity extends AppCompatActivity
             info.teacher = cursor.getString(cursor.getColumnIndex("teacher"));
         } else {
             try {
-                // if (!sp_reader.getString("" + id + "name", "").equals("")) {
+                if (!sp_reader.getString("" + id + "name", "").equals("")) {
                     // 无课程信息，但SharedPreferences中有临时修改的信息
                     info.existence = InfoExistence.SharedPreferences;
-                    // Log.d(TAG, "addCourseLayout: enter sp existence judge.");
-                    info.name = sp_reader.getString("" + id + "name", "");
-                    info.location = sp_reader.getString("" + id + "location", "");
-                    info.teacher = sp_reader.getString("" + id + "teacher", "");
-                // }
+                    info.name = sp_reader.getString("" + id + "name", "null");
+                    info.location = sp_reader.getString("" + id + "location", "null");
+                    info.teacher = sp_reader.getString("" + id + "teacher", "null");
+                Log.d(TAG, "addCourseLayout: get info from sp: " + info.name + " " + info.location + "" + info.teacher);
+                } else {
+                    Log.d(TAG, "addCourseLayout: " + id + " sp is empty.");
+                }
             } catch (Exception NullPointerException) {
                 // SharedPreferences中也无临时信息，则信息彻底暂无
                 info.existence = InfoExistence.Empty;
@@ -324,22 +353,12 @@ public class MainActivity extends AppCompatActivity
     public void onGetNumClickComplete(int num) {
         // 获取课程数，并将信息存入数据库
         course_num = num;
-        //TODO: 根据课程数，多次设置时间
         for (int i = 1; i <= num; i++) {
-            db.execSQL("insert into TimeInfo(id, time) values(?, ?)",
-                    new String[] {"" + i, ""});
+            db.execSQL("insert into Settings(keys, value, type) values(?, ?, ?)",
+                    new String[] {"time"+i, "", "start_time"});
         }
         // 布局中动态增加课程布局
         addCourseLayout();
-
-        final Cursor temp = db.rawQuery("select time from TimeInfo where id = ?", new String[] {"" + 1});
-        String time = "第" + "1节课： ";
-        if (temp.getCount() == 1) {
-            // 库中已有时间信息
-            temp.moveToFirst();
-            time += temp.getString(temp.getColumnIndex("time"));
-            Log.d(TAG, "onCreate: when exist, course 1" + " " + time);
-        }
     }
 
     @Override
@@ -362,7 +381,6 @@ public class MainActivity extends AppCompatActivity
             location.setText("");
             teacher.setText("");
             time.setText("");
-
             // 删除本课程
             db.execSQL("delete from Curriculum where id = ?", new String[] {"" + id});
         } else if (state == SetCourseDialogFragment.CONFIRM){
@@ -396,22 +414,26 @@ public class MainActivity extends AppCompatActivity
                 sp_editor.putString("" + id + "teacher", course_teacher);
                 sp_editor.apply();
                 String temp = sp_reader.getString("" + id + "name", "");
-                Log.d(TAG, "onClickResult: get in time: " + temp);
+                Log.d(TAG, "onClickResult: get sp in time: " + temp);
                 // 修改课程信息中断，不存入sp
             }
         }
     }
 
     @Override
-    // 清空数据，重新设置
+    // 清空数据，重新设置，重设数据
     public void onDeleteConfirmClick(boolean confirm) {
         if (confirm) {
             // 确定清空
             sp_editor.clear();
             sp_editor.apply();
             db.execSQL("delete from Curriculum");
-            db.execSQL("delete from TimeInfo");
-            db.execSQL("update Settings set value = ?", new String[] {"0"});
+            // db.execSQL("delete from TimeInfo");
+            db.execSQL("update Settings set value = ? where type = ?",
+                    new String[] {"0", "week_num"});
+            db.execSQL("delete from Settings where type = ?",
+                    new String[] {"start_time"});
+            db.execSQL("delete from Notes");
 
             // 重启
             Intent intent = new Intent(this, MainActivity.class);
@@ -423,16 +445,23 @@ public class MainActivity extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         switch (requestCode) {
             case 1:
-                // 重置当前信息
-                linearLayout.removeAllViews();
-                addCourseLayout();
-//                Log.d(TAG, "onActivityResult: data==null? " + (data == null));
-//                this.cur_week = data.getIntExtra("cur_week", 0);
-//                if (cur_week != 0) {
-//                    setTitle("第" + this.cur_week + "周");
-//                }
-                setCurWeek();
-                Log.d(TAG, "onActivityResult: reset info after set time.");
+                // 设置的返回, 重置当前信息
+                if (data != null) {
+                    Log.d(TAG, "onActivityResult: Settings result. data exists.");
+                    linearLayout.removeAllViews();
+                    addCourseLayout();
+                    Log.d(TAG, "onActivityResult: get cur_week: " +  data.getIntExtra("cur_week", 0));
+                    this.cur_week = data.getIntExtra("cur_week", 0);
+                    Log.d(TAG, "onActivityResult: after set, cur_week: " + this.cur_week);
+                    if (cur_week != 0) {
+                        // setTitle("第" + this.cur_week + "周");
+                        setTitle("ha !");
+                        setTitle("ha !");
+                        Log.d(TAG, "onActivityResult: setTitle" + this.cur_week);
+                    }
+                    setCurWeek();
+                }
+                break;
             default:
                 break;
         }
