@@ -20,9 +20,9 @@ public class MyDBHelper extends SQLiteOpenHelper {
             "location text," +
             "name text)";
 
-    public static final String CREATE_TIMEINFO = "create table TimeInfo (" +
-            "id integer primary key autoincrement," +
-            "time text)";
+//    public static final String CREATE_TIMEINFO = "create table TimeInfo (" +
+//            "id integer primary key autoincrement," +
+//            "time text)";
 
     public static final String CREATE_SETTINGS = "create table Settings (" +
             "id integer primary key autoincrement," +

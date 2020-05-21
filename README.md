@@ -45,6 +45,13 @@
 
 ## 数据库
 
+### Curriculum表：
+
+1. id：主键，自增；三位，星期（1）+当天课程序号（2）
+2. teacher：text，记录教师名
+3. location：text，记录教室
+4. name：text，记录课程名
+
 ### Notes表：
 
 1. id：主键，自增
