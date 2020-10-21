@@ -39,7 +39,7 @@
   6. 重设数据按键：清空SharedPreferences内容和SQLite表项，并重启应用
   7. 设置时间按键：新活动，使用TimePickerDialog设置时间，并保存进SQLite
 
-
+<br/>
 
 ## 2.0ver
 
@@ -51,7 +51,7 @@
 
 去年开始：当前学期周 = 去年总周数 - 学期开始周 + 1 + 当前自然周
 
-
+<br/>
 
 ## 3.0ver
 
@@ -72,7 +72,7 @@
 3. 数据库调整：删除TimeInfo表，并入Settings表
 4. 细节优化
 
-
+<br/>
 
 ## 数据库
 
@@ -110,7 +110,7 @@
 	1. keys：time+i
 	2. type: start_time
 
-
+<br/>
 
 ## 待做
 
